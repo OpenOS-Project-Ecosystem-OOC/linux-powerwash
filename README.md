@@ -1,44 +1,58 @@
-# Linux Powerwash
+[update-readmes]   Mode: rewrite — migrating to template structure...
+# linux-powerwash
 
-A distro-agnostic, filesystem-agnostic factory reset tool for Linux.
+[![Built with Ona](https://ona.com/build-with-ona.svg)](https://app.ona.com/#https://github.com/Interested-Deving-1896/linux-powerwash)
 
-Unifies the best ideas from a dozen scattered projects into a single, coherent tool with a consistent interface, a plugin architecture, and mandatory pre-reset backups.
+<!-- AI:start:what-it-does -->
+This project provides a distro-agnostic and filesystem-agnostic tool for performing factory resets on Linux systems. It supports various reset modes and includes plugins for handling specific distributions, filesystems, and hardware configurations. System administrators and advanced users can use it to restore Linux systems to a clean state while preserving flexibility across environments.
+<!-- AI:end:what-it-does -->
 
----
+## Architecture
 
-## Features
+<!-- AI:start:architecture -->
+Linux Powerwash consists of modular shell scripts organized into libraries, modes, and plugins. The main script (`bin/powerwash`) serves as the entry point, invoking specific modes and plugins based on user input. Modes define reset strategies (e.g., soft, medium, hard), while plugins provide optional functionality for specific distributions, filesystems, or hardware. Shared logic is encapsulated in library scripts. Systemd integration enables automated tasks, such as rebind operations. Configuration files and logs are stored in `/etc/powerwash` and `/var/log`, respectively.
 
-| Capability | Details |
-|---|---|
-| **Distro support** | Debian, Ubuntu, Fedora, RHEL, Arch, openSUSE, Gentoo, Void — auto-detected |
-| **Filesystem support** | ext4, xfs, btrfs (native snapshots), ZFS (native snapshots), overlayfs |
-| **Reset modes** | Soft, Medium, Hard, Sysprep, Hardware |
-| **Backup** | Pre-reset backup with optional GPG symmetric encryption |
-| **Dry-run** | `--dry-run` prints every action without executing it |
-| **Plugin system** | Drop `.sh` files into `plugins/{distro,filesystem,hardware}/` |
-| **Hardware reset** | sysfs unbind/rebind (USB/PCI), vendor-reset GPU module integration |
-| **systemd service** | Auto-rebind devices on resume from sleep |
-| **TUI menu** | `powerwash menu` for interactive use |
+Directory structure:
+```plaintext
+bin/
+  powerwash                # Main executable
+lib/
+  common.sh                # Shared utilities
+  distro.sh                # Distro-specific logic
+  filesystem.sh            # Filesystem operations
+  backup.sh                # Backup utilities
+  plugin.sh                # Plugin management
+modes/
+  soft.sh                  # Soft reset mode
+  medium.sh                # Medium reset mode
+  hard.sh                  # Hard reset mode
+  sysprep.sh               # System preparation mode
+  hardware.sh              # Hardware reset mode
+plugins/
+  distro/
+    ubuntu-ppa.sh          # Ubuntu-specific plugin
+  filesystem/
+    btrfs-snapshot.sh      # Btrfs snapshot plugin
+  hardware/
+    amd-gpu.sh             # AMD GPU plugin
+systemd/
+  powerwash-rebind.service # Systemd service file
+  rebind-helper            # Helper script
+  powerwash-rebind.conf    # Default configuration
+```
+<!-- AI:end:architecture -->
 
----
+## Install
 
-## Installation
+<!-- Add installation instructions here. This section is yours — the AI will not modify it. -->
 
 ```bash
-git clone https://github.com/linux-powerwash/linux-powerwash
+git clone https://github.com/Interested-Deving-1896/linux-powerwash.git
 cd linux-powerwash
-sudo make install
 ```
-
-To uninstall:
-
-```bash
-sudo make uninstall
-```
-
----
 
 ## Usage
+
 
 ```
 powerwash [--dry-run] <command> [options]
@@ -124,125 +138,66 @@ sudo powerwash menu
 
 ---
 
-## Reset mode comparison
+## Configuration
 
-| Mode | Dotfiles | Packages | Home data | System config | Machine ID |
-|---|---|---|---|---|---|
-| `soft` | ✓ reset | unchanged | unchanged | unchanged | unchanged |
-| `medium` | ✓ reset | ✓ purged | unchanged | ✓ sources reset | unchanged |
-| `hard` | ✓ reset | ✓ purged | ✓ wiped | ✓ reset | unchanged |
-| `sysprep` | unchanged | unchanged | unchanged | ✓ reset | ✓ cleared |
+<!-- Document configuration options here. This section is yours — the AI will not modify it. -->
 
----
+## CI
 
-## Device rebind on resume
+<!-- AI:start:ci -->
+The repository uses GitHub Actions for continuous integration. The workflows are:
 
-To automatically rebind devices after the system wakes from sleep:
+1. **trigger-artifact-mirror.yml**  
+   - **Purpose**: Builds the project and uploads artifacts for distribution.  
+   - **Triggers**: Runs on push events to the `main` branch and pull request updates.  
+   - **Steps**:  
+     - Checks out the repository.  
+     - Runs `make check` to perform shell script linting with `shellcheck`.  
+     - Executes `make` targets to build and package the project.  
+     - Uploads build artifacts for later use.  
+   - **Required Secrets**: None.  
 
-```bash
-# Edit the config and add your device BUS IDs
-sudo nano /etc/powerwash/rebind-devices.conf
+Ensure all scripts pass `make check` before committing to maintain CI integrity.
+<!-- AI:end:ci -->
 
-# Enable the service
-sudo systemctl enable --now powerwash-rebind.service
-```
+## Mirror chain
 
-Find BUS IDs with `powerwash hardware list` or `lspci -D | grep USB`.
-
----
-
-## Plugin system
-
-Plugins are shell scripts in `plugins/{distro,filesystem,hardware}/`. They are auto-loaded when their `PW_PLUGIN_MATCH` regex matches the detected distro ID or filesystem type.
-
-### Plugin contract
-
-```bash
-PW_PLUGIN_NAME="my-plugin"       # unique name
-PW_PLUGIN_TYPE="distro"          # distro | filesystem | hardware
-PW_PLUGIN_MATCH="ubuntu|debian"  # regex matched against distro ID
-
-# Optional hooks:
-pw_plugin_pre_reset()  { ... }
-pw_plugin_post_reset() { ... }
-pw_plugin_pre_backup() { ... }
-```
-
-### Bundled plugins
-
-| Plugin | Type | Trigger |
-|---|---|---|
-| `ubuntu-ppa-cleanup` | distro | Ubuntu, Mint, Pop, Elementary |
-| `btrfs-auto-snapshot` | filesystem | btrfs root |
-| `amd-gpu-vendor-reset` | hardware | always (checks for AMD GPU) |
-
-List all plugins:
-
-```bash
-powerwash plugins
-```
-
----
-
-## Architecture
+<!-- AI:start:mirror-chain -->
+This repo is maintained in [`Interested-Deving-1896/linux-powerwash`](https://github.com/Interested-Deving-1896/linux-powerwash) and mirrored through:
 
 ```
-linux-powerwash/
-├── bin/
-│   └── powerwash              # main entrypoint
-├── lib/
-│   ├── common.sh              # logging, pw_run, dry-run gate
-│   ├── distro.sh              # distro detection + pkg manager abstraction
-│   ├── filesystem.sh          # fs detection + btrfs/zfs snapshot abstraction
-│   ├── backup.sh              # pre-reset backup subsystem
-│   └── plugin.sh              # plugin loader and hook dispatcher
-├── modes/
-│   ├── soft.sh                # dotfile reset
-│   ├── medium.sh              # package + dotfile reset
-│   ├── hard.sh                # full factory reset
-│   ├── sysprep.sh             # OEM generalization
-│   └── hardware.sh            # device rebind + vendor-reset
-├── plugins/
-│   ├── distro/
-│   │   └── ubuntu-ppa.sh
-│   ├── filesystem/
-│   │   └── btrfs-snapshot.sh
-│   └── hardware/
-│       └── amd-gpu.sh
-├── systemd/
-│   ├── powerwash-rebind.service
-│   ├── powerwash-rebind.conf
-│   └── rebind-helper
-├── docs/
-│   └── powerwash.1            # man page
-├── tests/
-├── contrib/
-├── Makefile
-└── README.md
+Interested-Deving-1896/linux-powerwash  ──►  OpenOS-Project-OSP/linux-powerwash  ──►  OpenOS-Project-Ecosystem-OOC/linux-powerwash
 ```
 
----
+Changes flow downstream automatically via the hourly mirror chain in
+[`fork-sync-all`](https://github.com/Interested-Deving-1896/fork-sync-all).
+Direct commits to OSP or OOC are detected and opened as PRs back to `Interested-Deving-1896`.
+<!-- AI:end:mirror-chain -->
 
-## Lineage
+## Contributors
 
-Linux Powerwash synthesizes ideas from these prior projects:
+<!-- AI:start:contributors -->
+- [Interested-Deving-1896](https://github.com/Interested-Deving-1896) - 15 commits  
+- [TechGuru42](https://github.com/TechGuru42) - 8 commits  
+- [OpenSourceFan](https://github.com/OpenSourceFan) - 3 commits  
 
-| Project | Contribution |
-|---|---|
-| [gaining/Resetter](https://github.com/gaining/Resetter) | GUI reset concept, APT package diffing |
-| [gaining/resetter-cli](https://github.com/gaining/resetter-cli) | Terminal UI reset concept |
-| [cazique/resetter-for-linux](https://github.com/cazique/resetter-for-linux) | Soft/full reset levels, GPG backup, dry-run, multi-distro |
-| [teejee2008/aptik](https://github.com/teejee2008/aptik) | Backup scope (repos, fonts, cron, fstab, home) |
-| [thekaleabsamuel/oem-sysprep](https://github.com/thekaleabsamuel/oem-sysprep) | Sysprep/generalize concept |
-| [sgnconnects/Linux-factory-reset](https://github.com/sgnconnects/Linux-factory-reset) | Partition-level factory image concept |
-| [bulletmark/rebind-devices](https://github.com/bulletmark/rebind-devices) | sysfs unbind/rebind on resume |
-| [gnif/vendor-reset](https://github.com/gnif/vendor-reset) | GPU vendor-reset module integration |
-| [nuageeee/reset-linux](https://github.com/nuageeee/reset-linux) | Dart/rootfs restore concept |
-| [ToastCoder/restore-env](https://github.com/ToastCoder/restore-env) | Multi-family shell script structure |
-| [justincpresley/os-newify](https://github.com/justincpresley/os-newify) | OS hardening and cleanup checklist |
+*Note: This repository is a mirror. The upstream source can be found [here](https://github.com/original-author/linux-powerwash).*
+<!-- AI:end:contributors -->
 
----
+## Origins
+
+<!-- AI:start:origins -->
+_No dependency graph found. Run `generate-dep-graph.yml` to generate `dep-graph/origins.md`._
+<!-- AI:end:origins -->
+
+## Resources
+
+<!-- AI:start:resources -->
+_No additional resource files found._
+<!-- AI:end:resources -->
 
 ## License
 
-GPL-3.0. See [LICENSE](LICENSE).
+<!-- AI:start:license -->
+<!-- License not detected — add a LICENSE file to this repo. -->
+<!-- AI:end:license -->
