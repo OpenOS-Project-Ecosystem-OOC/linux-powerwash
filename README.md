@@ -4,41 +4,46 @@
 [![Built with Ona](https://ona.com/build-with-ona.svg)](https://app.ona.com/#https://github.com/Interested-Deving-1896/linux-powerwash)
 
 <!-- AI:start:what-it-does -->
-This project provides a distro-agnostic and filesystem-agnostic tool for performing factory resets on Linux systems. It supports various reset modes and includes plugins for handling specific distributions, filesystems, and hardware configurations. System administrators and advanced users can use it to restore Linux systems to a clean state while preserving flexibility across environments.
+This project provides a distro-agnostic and filesystem-agnostic factory reset tool for Linux systems. It enables system administrators and advanced users to restore a Linux installation to a clean state using customizable reset modes and plugins. It supports various distributions and filesystems, making it suitable for diverse environments.
 <!-- AI:end:what-it-does -->
 
 ## Architecture
 
 <!-- AI:start:architecture -->
-Linux Powerwash consists of modular shell scripts organized into libraries, modes, and plugins. The main script (`bin/powerwash`) serves as the entry point, invoking specific modes and plugins based on user input. Modes define reset strategies (e.g., soft, medium, hard), while plugins provide optional functionality for specific distributions, filesystems, or hardware. Shared logic is encapsulated in library scripts. Systemd integration enables automated tasks, such as rebind operations. Configuration files and logs are stored in `/etc/powerwash` and `/var/log`, respectively.
+The project consists of several components organized into distinct directories. The main script (`bin/powerwash`) serves as the entry point, orchestrating the factory reset process. Shared functionality is implemented in modular shell libraries located in `lib/`. Reset modes, which define varying levels of system cleanup, are stored in `modes/`. Plugins in `plugins/` provide optional, extensible functionality for specific distributions, filesystems, or hardware. Systemd service files and helpers are located in `systemd/` for integration with system services. Configuration files are stored in `/etc/powerwash`, while logs and state data are maintained in `/var/log` and `/var/lib/powerwash`, respectively.
 
 Directory structure:
 ```plaintext
-bin/
-  powerwash                # Main executable
-lib/
-  common.sh                # Shared utilities
-  distro.sh                # Distro-specific logic
-  filesystem.sh            # Filesystem operations
-  backup.sh                # Backup utilities
-  plugin.sh                # Plugin management
-modes/
-  soft.sh                  # Soft reset mode
-  medium.sh                # Medium reset mode
-  hard.sh                  # Hard reset mode
-  sysprep.sh               # System preparation mode
-  hardware.sh              # Hardware reset mode
-plugins/
-  distro/
-    ubuntu-ppa.sh          # Ubuntu-specific plugin
-  filesystem/
-    btrfs-snapshot.sh      # Btrfs snapshot plugin
-  hardware/
-    amd-gpu.sh             # AMD GPU plugin
-systemd/
-  powerwash-rebind.service # Systemd service file
-  rebind-helper            # Helper script
-  powerwash-rebind.conf    # Default configuration
+.
+├── bin
+│   └── powerwash
+├── docs
+├── lib
+│   ├── backup.sh
+│   ├── common.sh
+│   ├── distro.sh
+│   ├── filesystem.sh
+│   └── plugin.sh
+├── modes
+│   ├── soft.sh
+│   ├── medium.sh
+│   ├── hard.sh
+│   ├── sysprep.sh
+│   └── hardware.sh
+├── plugins
+│   ├── distro
+│   │   └── ubuntu-ppa.sh
+│   ├── filesystem
+│   │   └── btrfs-snapshot.sh
+│   └── hardware
+│       └── amd-gpu.sh
+├── systemd
+│   ├── powerwash-rebind.service
+│   └── rebind-helper
+├── .github
+├── LICENSE
+├── Makefile
+└── README.md
 ```
 <!-- AI:end:architecture -->
 
@@ -145,19 +150,7 @@ sudo powerwash menu
 ## CI
 
 <!-- AI:start:ci -->
-The repository uses GitHub Actions for continuous integration. The workflows are:
-
-1. **trigger-artifact-mirror.yml**  
-   - **Purpose**: Builds the project and uploads artifacts for distribution.  
-   - **Triggers**: Runs on push events to the `main` branch and pull request updates.  
-   - **Steps**:  
-     - Checks out the repository.  
-     - Runs `make check` to perform shell script linting with `shellcheck`.  
-     - Executes `make` targets to build and package the project.  
-     - Uploads build artifacts for later use.  
-   - **Required Secrets**: None.  
-
-Ensure all scripts pass `make check` before committing to maintain CI integrity.
+- **trigger-artifact-mirror.yml**: Runs on `push` and `pull_request` events. Builds the project using the `Makefile` and uploads the generated artifacts for distribution. Requires the `ARTIFACTS_REPO_TOKEN` secret for authentication with the artifact repository.
 <!-- AI:end:ci -->
 
 ## Mirror chain
@@ -177,11 +170,9 @@ Direct commits to OSP or OOC are detected and opened as PRs back to `Interested-
 ## Contributors
 
 <!-- AI:start:contributors -->
-- [Interested-Deving-1896](https://github.com/Interested-Deving-1896) - 15 commits  
-- [TechGuru42](https://github.com/TechGuru42) - 8 commits  
-- [OpenSourceFan](https://github.com/OpenSourceFan) - 3 commits  
+[@Interested-Deving-1896](https://github.com/Interested-Deving-1896): 3 commits  
 
-*Note: This repository is a mirror. The upstream source can be found [here](https://github.com/original-author/linux-powerwash).*
+*Note: This repository is a mirror. Please refer to the upstream source for the original project.*
 <!-- AI:end:contributors -->
 
 ## Origins
