@@ -4,41 +4,44 @@
 [![Built with Ona](https://ona.com/build-with-ona.svg)](https://app.ona.com/#https://github.com/Interested-Deving-1896/linux-powerwash)
 
 <!-- AI:start:what-it-does -->
-This project provides a distro-agnostic and filesystem-agnostic tool for performing factory resets on Linux systems. It supports various reset modes and includes plugins for handling specific distributions, filesystems, and hardware configurations. System administrators and advanced users can use it to restore Linux systems to a clean state while preserving flexibility across environments.
+This project provides a distro-agnostic and filesystem-agnostic tool for performing factory resets on Linux systems. It supports multiple reset modes, such as soft, medium, and hard resets, and includes plugins for handling specific distributions, filesystems, and hardware configurations. System administrators and power users utilize this tool to restore Linux systems to a clean state while preserving flexibility across environments.
 <!-- AI:end:what-it-does -->
 
 ## Architecture
 
 <!-- AI:start:architecture -->
-Linux Powerwash consists of modular shell scripts organized into libraries, modes, and plugins. The main script (`bin/powerwash`) serves as the entry point, invoking specific modes and plugins based on user input. Modes define reset strategies (e.g., soft, medium, hard), while plugins provide optional functionality for specific distributions, filesystems, or hardware. Shared logic is encapsulated in library scripts. Systemd integration enables automated tasks, such as rebind operations. Configuration files and logs are stored in `/etc/powerwash` and `/var/log`, respectively.
+The project consists of several components organized into distinct directories. The `bin` directory contains the main executable script (`powerwash`) responsible for initiating the factory reset process. The `lib` directory includes shared shell libraries for handling common tasks, such as filesystem operations, backup management, and plugin integration. The `modes` directory defines reset modes (e.g., soft, medium, hard) as modular scripts. The `plugins` directory provides optional extensions for specific distributions, filesystems, or hardware. Systemd integration is handled via the `systemd` directory, which includes service files and helper scripts. Configuration files are stored in `/etc/powerwash`, and logs are written to `/var/log`.
 
 Directory structure:
 ```plaintext
-bin/
-  powerwash                # Main executable
-lib/
-  common.sh                # Shared utilities
-  distro.sh                # Distro-specific logic
-  filesystem.sh            # Filesystem operations
-  backup.sh                # Backup utilities
-  plugin.sh                # Plugin management
-modes/
-  soft.sh                  # Soft reset mode
-  medium.sh                # Medium reset mode
-  hard.sh                  # Hard reset mode
-  sysprep.sh               # System preparation mode
-  hardware.sh              # Hardware reset mode
-plugins/
-  distro/
-    ubuntu-ppa.sh          # Ubuntu-specific plugin
-  filesystem/
-    btrfs-snapshot.sh      # Btrfs snapshot plugin
-  hardware/
-    amd-gpu.sh             # AMD GPU plugin
-systemd/
-  powerwash-rebind.service # Systemd service file
-  rebind-helper            # Helper script
-  powerwash-rebind.conf    # Default configuration
+.
+├── bin
+│   └── powerwash
+├── lib
+│   ├── common.sh
+│   ├── distro.sh
+│   ├── filesystem.sh
+│   ├── backup.sh
+│   └── plugin.sh
+├── modes
+│   ├── soft.sh
+│   ├── medium.sh
+│   ├── hard.sh
+│   ├── sysprep.sh
+│   └── hardware.sh
+├── plugins
+│   ├── distro
+│   │   └── ubuntu-ppa.sh
+│   ├── filesystem
+│   │   └── btrfs-snapshot.sh
+│   └── hardware
+│       └── amd-gpu.sh
+├── systemd
+│   ├── powerwash-rebind.service
+│   └── rebind-helper
+├── docs
+├── Makefile
+└── README.md
 ```
 <!-- AI:end:architecture -->
 
@@ -145,19 +148,21 @@ sudo powerwash menu
 ## CI
 
 <!-- AI:start:ci -->
-The repository uses GitHub Actions for continuous integration. The workflows are:
+The repository uses GitHub Actions for Continuous Integration (CI). The following workflows are defined:
 
-1. **trigger-artifact-mirror.yml**  
-   - **Purpose**: Builds the project and uploads artifacts for distribution.  
-   - **Triggers**: Runs on push events to the `main` branch and pull request updates.  
-   - **Steps**:  
-     - Checks out the repository.  
-     - Runs `make check` to perform shell script linting with `shellcheck`.  
-     - Executes `make` targets to build and package the project.  
-     - Uploads build artifacts for later use.  
+1. **`mirror-osp-to-ooc.yaml`**  
+   - **Purpose**: Mirrors the repository to an external Git hosting service.  
+   - **Triggers**: Runs on every push to the `main` branch.  
+   - **Required Secrets**:  
+     - `MIRROR_REPO_URL`: URL of the external repository.  
+     - `MIRROR_REPO_TOKEN`: Authentication token for the external repository.
+
+2. **`trigger-artifact-mirror.yml`**  
+   - **Purpose**: Builds the project and uploads artifacts for mirroring.  
+   - **Triggers**: Runs on pull requests and pushes to the `main` branch.  
    - **Required Secrets**: None.  
 
-Ensure all scripts pass `make check` before committing to maintain CI integrity.
+Both workflows ensure code quality and facilitate external repository synchronization.
 <!-- AI:end:ci -->
 
 ## Mirror chain
@@ -177,17 +182,15 @@ Direct commits to OSP or OOC are detected and opened as PRs back to `Interested-
 ## Contributors
 
 <!-- AI:start:contributors -->
-- [Interested-Deving-1896](https://github.com/Interested-Deving-1896) - 15 commits  
-- [TechGuru42](https://github.com/TechGuru42) - 8 commits  
-- [OpenSourceFan](https://github.com/OpenSourceFan) - 3 commits  
+[@Interested-Deving-1896](https://github.com/Interested-Deving-1896) - 5 commits  
 
-*Note: This repository is a mirror. The upstream source can be found [here](https://github.com/original-author/linux-powerwash).*
+*Note: This repository is a mirror. Please refer to the upstream source for additional contributions and updates.*
 <!-- AI:end:contributors -->
 
 ## Origins
 
 <!-- AI:start:origins -->
-_No dependency graph found. Run `generate-dep-graph.yml` to generate `dep-graph/origins.md`._
+_Original project — no upstream fork._
 <!-- AI:end:origins -->
 
 ## Resources
