@@ -4,15 +4,23 @@
 [![Built with Ona](https://ona.com/build-with-ona.svg)](https://app.ona.com/#https://github.com/Interested-Deving-1896/linux-powerwash)
 
 <!-- AI:start:what-it-does -->
-This project provides a distro-agnostic and filesystem-agnostic tool for performing factory resets on Linux systems. It supports multiple reset modes, such as soft, medium, and hard resets, and includes plugins for handling specific distributions, filesystems, and hardware configurations. System administrators and power users utilize this tool to restore Linux systems to a clean state while preserving flexibility across environments.
+This project provides a distro-agnostic and filesystem-agnostic tool for performing factory resets on Linux systems. It supports multiple reset modes, such as soft, medium, and hard resets, and includes plugins for handling specific distributions, filesystems, and hardware configurations. System administrators and developers use it to restore Linux environments to a clean state while preserving flexibility across different setups.
 <!-- AI:end:what-it-does -->
 
 ## Architecture
 
 <!-- AI:start:architecture -->
-The project consists of several components organized into distinct directories. The `bin` directory contains the main executable script (`powerwash`) responsible for initiating the factory reset process. The `lib` directory includes shared shell libraries for handling common tasks, such as filesystem operations, backup management, and plugin integration. The `modes` directory defines reset modes (e.g., soft, medium, hard) as modular scripts. The `plugins` directory provides optional extensions for specific distributions, filesystems, or hardware. Systemd integration is handled via the `systemd` directory, which includes service files and helper scripts. Configuration files are stored in `/etc/powerwash`, and logs are written to `/var/log`.
+Linux Powerwash consists of modular shell scripts organized into directories based on functionality. The main components include:
 
-Directory structure:
+- **Binary**: The `bin/powerwash` script serves as the entry point for executing the tool.
+- **Libraries**: Core functionality is implemented in reusable shell scripts located in `lib/`. These include utilities for handling distributions, filesystems, backups, and plugins.
+- **Modes**: Reset modes are defined in `modes/`, each implementing a specific level of reset (e.g., soft, medium, hard).
+- **Plugins**: Optional extensions are stored in `plugins/`, categorized by functionality (e.g., `distro`, `filesystem`, `hardware`).
+- **Systemd Integration**: Systemd service files and helpers are in `systemd/` for managing system-level tasks.
+- **Configuration**: Default configuration files are stored in `/etc/powerwash`.
+
+The directory structure is as follows:
+
 ```plaintext
 .
 ├── bin
@@ -38,9 +46,10 @@ Directory structure:
 │       └── amd-gpu.sh
 ├── systemd
 │   ├── powerwash-rebind.service
+│   ├── powerwash-rebind.conf
 │   └── rebind-helper
 ├── docs
-├── Makefile
+├── dep-graph
 └── README.md
 ```
 <!-- AI:end:architecture -->
@@ -148,21 +157,19 @@ sudo powerwash menu
 ## CI
 
 <!-- AI:start:ci -->
-The repository uses GitHub Actions for Continuous Integration (CI). The following workflows are defined:
+The repository uses GitHub Actions for continuous integration. The following workflows are defined:
 
 1. **`mirror-osp-to-ooc.yaml`**  
-   - **Purpose**: Mirrors the repository to an external Git hosting service.  
-   - **Triggers**: Runs on every push to the `main` branch.  
-   - **Required Secrets**:  
-     - `MIRROR_REPO_URL`: URL of the external repository.  
-     - `MIRROR_REPO_TOKEN`: Authentication token for the external repository.
+   - Syncs the repository to an external mirror.  
+   - Trigger: Push events to the default branch.  
+   - Required secrets: `MIRROR_REPO_URL`, `MIRROR_REPO_TOKEN`.
 
 2. **`trigger-artifact-mirror.yml`**  
-   - **Purpose**: Builds the project and uploads artifacts for mirroring.  
-   - **Triggers**: Runs on pull requests and pushes to the `main` branch.  
-   - **Required Secrets**: None.  
+   - Triggers artifact mirroring to external storage.  
+   - Trigger: Successful completion of the `mirror-osp-to-ooc.yaml` workflow.  
+   - Required secrets: `ARTIFACT_STORAGE_URL`, `ARTIFACT_STORAGE_TOKEN`.  
 
-Both workflows ensure code quality and facilitate external repository synchronization.
+Both workflows ensure repository synchronization and artifact availability.
 <!-- AI:end:ci -->
 
 ## Mirror chain
@@ -182,9 +189,9 @@ Direct commits to OSP or OOC are detected and opened as PRs back to `Interested-
 ## Contributors
 
 <!-- AI:start:contributors -->
-[@Interested-Deving-1896](https://github.com/Interested-Deving-1896) - 5 commits  
+[@Interested-Deving-1896](https://github.com/Interested-Deving-1896): 8 commits
 
-*Note: This repository is a mirror. Please refer to the upstream source for additional contributions and updates.*
+Note: This repository is a mirror. Please refer to the upstream source for additional details.
 <!-- AI:end:contributors -->
 
 ## Origins
